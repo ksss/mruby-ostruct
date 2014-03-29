@@ -9,6 +9,7 @@ class OpenStruct
       hash.each do |k,v|
         k = k.to_sym
         @table[k] = v
+        new_ostruct_member(k)
       end
     end
   end
@@ -16,7 +17,27 @@ class OpenStruct
   def initialize_copy orig
     super
     @table = @table.dup
+    @table.each_key{|key| new_ostruct_member(key)}
   end
+
+  def to_h
+    @table.dup
+  end
+
+  def each_pair
+    return to_enum __method__ unless block_given?
+    @table.each{|p| yield p}
+  end
+
+  def new_ostruct_member name
+    name = name.to_sym
+    unless respond_to?(name)
+      define_singleton_method(name){ @table[name] }
+      define_singleton_method("#{name}="){ |x| @table[name] = x }
+    end
+    name
+  end
+  protected :new_ostruct_member
 
   def inspect
     str = "#<#{self.class}"
@@ -32,23 +53,15 @@ class OpenStruct
   end
   alias :to_s :inspect
 
-  def each_pair
-    @table.each{ |p|
-      yield p
-    }
-  end
-
   def delete_field name
-    table.delete name.to_sym
-  end
-
-  def to_h
-    table.dup
+    sym = name.to_sym
+    singleton_class.remove_method sym, "#{sym}=".to_sym
+    @table.delete sym
   end
 
   def == other
     return false unless other.kind_of?(OpenStruct)
-    table == other.table
+    @table == other.table
   end
 
   def [] key
@@ -56,7 +69,7 @@ class OpenStruct
   end
 
   def []= key, value
-    @table[key.to_sym] = value
+    @table[new_ostruct_member(key)] = value
   end
 
   def eql? other
@@ -72,17 +85,17 @@ class OpenStruct
   protected :table
 
   def method_missing mid, *args
-    name = mid.id2name
+    mname = mid.id2name
     len = args.length
-    if name.chomp! '='
+    if mname.chomp! '='
       if len != 1
         raise ArgumentError, "wrong number of arguments (#{len} for 1)"
       end
-      @table[name.to_sym] = args[0]
+      @table[new_ostruct_member(mname)] = args[0]
     elsif len == 0
       @table[mid]
     else
-      raise NoMethodError "undefined method `#{mid}' for #{self}"
+      raise NoMethodError, "undefined method `#{mid}' for #{self}"
     end
   end
 end

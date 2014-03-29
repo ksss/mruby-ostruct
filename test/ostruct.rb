@@ -44,20 +44,25 @@ end
 
 assert 'OpenStruct#delete_field' do
   o = OpenStruct.new
- 
-  assert_equal('foo', o.foo = 'foo')
-  assert_equal('foo', o.foo)
-  foo = o.delete_field(:foo)
-  assert_equal(nil, o.foo)
-
-  obj = Object.new
-  def obj.to_sym
+  assert_false(o.respond_to? :a)
+  assert_false(o.respond_to? :a=)
+  o.a = 'a'
+  assert_true(o.respond_to? :a)
+  assert_true(o.respond_to? :a=)
+  a = o.delete_field :a
+  assert_false(o.respond_to? :a)
+  assert_false(o.respond_to? :a=)
+  assert_equal(a, 'a')
+  s = Object.new
+  def s.to_sym
     :foo
   end
-  o[obj] = true
-  assert_equal(true, o.foo)
-  o.delete_field obj
-  assert_equal(nil, o.foo)
+  o[s] = true
+  assert_true(o.respond_to? :foo)
+  assert_true(o.respond_to? :foo=)
+  o.delete_field s
+  assert_false(o.respond_to? :foo)
+  assert_false(o.respond_to? :foo=)
 end
 
 assert 'OpenStruct#setter' do
