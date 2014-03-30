@@ -33,7 +33,7 @@ class OpenStruct
     name = name.to_sym
     unless respond_to?(name)
       define_singleton_method(name){ @table[name] }
-      define_singleton_method("#{name}="){ |x| @table[name] = x }
+      define_singleton_method("#{name}=".to_sym){ |x| @table[name] = x }
     end
     name
   end
@@ -55,7 +55,7 @@ class OpenStruct
 
   def delete_field name
     sym = name.to_sym
-    singleton_class.remove_method sym, "#{sym}=".to_sym
+    singleton_class.__send__ :remove_method, sym, "#{sym}=".to_sym
     @table.delete sym
   end
 
