@@ -1,6 +1,6 @@
 ##
 # OpenStruct
-#
+# This code is based on https://github.com/ruby/ruby/blob/trunk/lib/ostruct.rb
 
 class OpenStruct
   def initialize hash=nil
