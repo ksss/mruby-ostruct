@@ -104,7 +104,7 @@ end
 
 assert 'OpenStruct#hash' do
   o1 = OpenStruct.new age: 27
-  o2 = OpenStruct.new age: 27.0
+  o2 = OpenStruct.new age: 28
   assert_not_equal o1.hash, o2.hash
   assert_equal o1.hash, o1.dup.hash
 end
