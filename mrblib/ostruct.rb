@@ -85,7 +85,7 @@ class OpenStruct
   protected :table
 
   def method_missing mid, *args
-    mname = mid.id2name
+    mname = mid.to_s
     len = args.length
     if mname.chomp! '='
       if len != 1
